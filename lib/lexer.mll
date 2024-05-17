@@ -2,7 +2,6 @@
   open Parser (* This assumes the parser module is named `Parser` *)
 }
 
-let digit = ['0'-'1']
 let letter = ['a'-'z']
 let whitespace = [' ' '\t' '\r' '\n']
 

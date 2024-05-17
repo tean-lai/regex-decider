@@ -50,35 +50,69 @@ let e6 = Star (Char 'y')
 let gen_test name expected_output actual_output : test =
   name >:: fun _ -> assert_equal expected_output actual_output
 
+let regex_test decide s1 s2 expected =
+  let name = if expected then s1 ^ " = " ^ s2 else s1 ^ " <> " ^ s2 in
+  let e1 = s1 |> Parse.parse_exp in
+  let e2 = s2 |> Parse.parse_exp in
+  name >:: fun _ -> assert_equal expected (decide e1 e2)
+
+let parse_test s expected =
+  let exp_string = s |> Parse.parse_exp |> string_of_exp in
+  let name = s ^ " -> " ^ expected in
+  name >:: fun _ -> assert_equal ~printer:(fun x -> x) expected exp_string
+
 let dfa_equiv_tests =
+  [ (* gen_test "dfa1 = dfa2" true (Equivalence.decide dfa1 dfa2);
+       gen_test "dfa1 <> dfa3" false (Equivalence.decide dfa1 dfa3); *) ]
+
+let parse_tests =
   [
-    gen_test "dfa1 = dfa2" true (Equivalence.decide dfa1 dfa2);
-    gen_test "dfa1 <> dfa3" false (Equivalence.decide dfa1 dfa3);
+    parse_test "a + b" "Sum (Char a, Char b)";
+    parse_test "(x + x) + x" "Sum (Sum (Char x, Char x), Char x)";
+    parse_test "x + (x + x)" "Sum (Char x, Sum (Char x, Char x))";
+    parse_test "x^" "Star (Char x)";
+    parse_test "x^^" "Star (Star (Char x))";
+    parse_test "(x * y)^ * x" "Prod (Star (Prod (Char x, Char y)), Char x)";
+    parse_test "x * (y * x)^" "Prod (Char x, Star (Prod (Char y, Char x)))";
+    parse_test "(x + y)^" "Star (Sum (Char x, Char y))";
+    parse_test "x^ * (y * x^)^"
+      "Prod (Star (Char x), Star (Prod (Char y, Star (Char x))))";
+    parse_test "(1 + x) * (1 + x) * (x * x * x)^"
+      "Prod (Prod (Sum (One, Char x), Sum (One, Char x)), Star (Prod (Prod \
+       (Char x, Char x), Char x)))";
+    parse_test "" "One";
   ]
 
-let regex_equiv_tests =
+let regex_equiv_tests decide =
   [
-    gen_test "x* = x**" true
-      (Equivalence.decide (Automata.exp_to_dfa e1) (Automata.exp_to_dfa e3));
-    gen_test "x** = x*" true
-      (Equivalence.decide (Automata.exp_to_dfa e3) (Automata.exp_to_dfa e1));
-    gen_test "x* <> y*" false
-      (Equivalence.decide (Automata.exp_to_dfa e1) (Automata.exp_to_dfa e6));
-    gen_test "y* <> x*" false
-      (Equivalence.decide (Automata.exp_to_dfa e6) (Automata.exp_to_dfa e1));
-    gen_test "x* = x*x*" true
-      (Equivalence.decide (Automata.exp_to_dfa e1) (Automata.exp_to_dfa e2));
-    gen_test "x(yx)* = (xy)*x" true
-      (Equivalence.decide (Automata.exp_to_dfa e5) (Automata.exp_to_dfa e4));
-    gen_test "(xy)*x = (xy)*x" true
-      (Equivalence.decide (Automata.exp_to_dfa e4) (Automata.exp_to_dfa e4));
-    gen_test "x + x = x" true
-      (Equivalence.decide
-         (Automata.exp_to_dfa (Sum (Char 'x', Char 'x')))
-         (Automata.exp_to_dfa (Char 'x')));
+    regex_test decide "x^" "x^ * x^" true;
+    regex_test decide "x^" "x^^" true;
+    regex_test decide "(x * y)^ * x" "x * (y * x)^" true;
+    regex_test decide "(x + y)^" "x^ * (y * x^)^" true;
+    regex_test decide "x^" "(1 + x) * (1 + x) * (x * x * x)^" true;
+    regex_test decide "a" "b" false;
+    regex_test decide "a + b" "a" false;
+    regex_test decide "a + a" "a" true;
+    regex_test decide "b + a" "a + b" true;
+    regex_test decide "b * a" "a * b" false;
+    regex_test decide "a" "a^" false;
+    regex_test decide "1 + a * a^" "a^" true;
+    regex_test decide "1 + a^ * a" "a^" true;
+    regex_test decide "1 * a" "a" true;
+    regex_test decide "0 * (a + b)" "0" true;
+    regex_test decide "(a + b) + c" "a + (b + c)" true;
+    regex_test decide "(a * b) * c" "a * (b * c)" true;
+    regex_test decide "(a + b) * c" "a * c + b * c" true;
   ]
 
 let suite =
-  "test suite for A2" >::: List.flatten [ dfa_equiv_tests; regex_equiv_tests ]
+  "test suite for A2"
+  >::: List.flatten
+         [
+           dfa_equiv_tests;
+           regex_equiv_tests Equivalence.decide;
+           regex_equiv_tests Equivalence.decide2;
+           parse_tests;
+         ]
 
 let _ = run_test_tt_main suite

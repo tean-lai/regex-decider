@@ -2,7 +2,8 @@
     open Ast
 %}
 
-%token ZERO ONE
+%token ZERO
+%token ONE
 %token <char> CHAR
 %token PLUS
 %token TIMES

@@ -10,8 +10,7 @@ let help s =
 let help2 s1 s2 =
   print_string (s1 ^ " = " ^ s2 ^ ": ");
   let exp1, exp2 = (parse_exp s1, parse_exp s2) in
-  let dfa1, dfa2 = (exp_to_dfa exp1, exp_to_dfa exp2) in
-  let equiv = decide dfa1 dfa2 in
+  let equiv = decide exp1 exp2 in
   print_endline (string_of_bool equiv)
 
 let () =
@@ -28,7 +27,7 @@ let () =
   help "(1 + x) * (1 + x) * (x * x * x)^"
 
 let () =
-  print_endline "\n\nNow we do problem 1 of homework 1 (a-e)";
+  print_endline "\nNow we do problem 1 of homework 1 (a-e)";
   help2 "x^" "x^ * x^";
   help2 "x^" "x^^";
   help2 "(x * y)^ * x" "x * (y * x)^";
@@ -36,6 +35,17 @@ let () =
   help2 "x^" "(1 + x) * (1 + x) * (x * x * x)^"
 
 let () =
-  print_endline "\n\nNow we do counterexamples";
+  print_endline "\nNow we do more examples";
   help2 "a" "b";
-  help2 "a + b" "a"
+  help2 "a + b" "a";
+  help2 "a + a" "a";
+  help2 "b + a" "a + b";
+  help2 "b * a" "a * b";
+  help2 "a" "a^";
+  help2 "1 + a * a^" "a^";
+  help2 "1 + a^ * a" "a^";
+  help2 "1 * a" "a";
+  help2 "0 * (a + b)" "0";
+  help2 "(a + b) + c" "a + (b + c)";
+  help2 "(a * b) * c" "a * (b * c)";
+  help2 "(a + b) * c" "a * c + b * c"
