@@ -2,8 +2,8 @@ type exp =
   | Zero
   | One
   | Char of char
-  | Sum of exp * exp
-  | Prod of exp * exp
+  | Sum of exp list
+  | Prod of exp list
   | Star of exp
 
 let rec string_of_exp e =
@@ -11,8 +11,9 @@ let rec string_of_exp e =
   | Zero -> "Zero"
   | One -> "One"
   | Char c -> Printf.sprintf "Char %c" c
-  | Sum (e1, e2) ->
-      Printf.sprintf "Sum (%s, %s)" (string_of_exp e1) (string_of_exp e2)
-  | Prod (e1, e2) ->
-      Printf.sprintf "Prod (%s, %s)" (string_of_exp e1) (string_of_exp e2)
+  | Sum es ->
+      Printf.sprintf "Sum [%s]" (String.concat "; " (List.map string_of_exp es))
+  | Prod es ->
+      Printf.sprintf "Prod [%s]"
+        (String.concat "; " (List.map string_of_exp es))
   | Star e -> Printf.sprintf "Star (%s)" (string_of_exp e)

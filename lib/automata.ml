@@ -148,9 +148,13 @@ let rec exp_to_nfae (e : exp) : nfae =
         start = IntSet.of_list [ 1 ];
         final = IntSet.of_list [ 2 ];
       }
-  | Sum (e1, e2) ->
+  | Sum [] -> failwith "shouldn't happen"
+  | Sum [ e1 ] -> exp_to_nfae e1
+  | Sum (e1 :: erest) ->
       let nfa1 = e1 |> exp_to_nfae |> inc_all_states_nfae 1 in
-      let nfa2 = e2 |> exp_to_nfae |> inc_all_states_nfae (1 + nfa1.size) in
+      let nfa2 =
+        Sum erest |> exp_to_nfae |> inc_all_states_nfae (1 + nfa1.size)
+      in
       let s, t = (1, 2 + nfa1.size + nfa2.size) in
       {
         size = 2 + nfa1.size + nfa2.size;
@@ -166,9 +170,13 @@ let rec exp_to_nfae (e : exp) : nfae =
         start = IntSet.of_list [ s ];
         final = IntSet.of_list [ t ];
       }
-  | Prod (e1, e2) ->
+  | Prod [] -> failwith "shouldn't happen"
+  | Prod [ e1 ] -> exp_to_nfae e1
+  | Prod (e1 :: erest) ->
       let nfa1 = e1 |> exp_to_nfae in
-      let nfa2 = e2 |> exp_to_nfae |> inc_all_states_nfae (nfa1.size - 1) in
+      let nfa2 =
+        Prod erest |> exp_to_nfae |> inc_all_states_nfae (nfa1.size - 1)
+      in
       {
         size = nfa1.size + nfa2.size - 1;
         delta = merge nfa1.delta nfa2.delta;

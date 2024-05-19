@@ -35,14 +35,15 @@ let e1dfa = Automata.nfae_to_dfa e1nfae
 (* let () = Automata.print_nfae_info e1nfae *)
 (* let () = e1nfae |> Automata.inc_all_states_nfae 10 |> Automata.print_nfae_info *)
 (* let () = print_endline "\n\n\n" *)
-let e2 = Prod (e1, e1)
+let e2 = Prod [ e1; e1 ]
 
 (* let () = e2 |> Automata.exp_to_nfae |> Automata.print_nfae_info *)
 let e3 = Star e1
 
 (* let () = e3 |> Automata.exp_to_nfae |> Automata.print_nfae_info *)
-let e4 = Prod (Star (Prod (Char 'x', Char 'y')), Char 'x')
-let e5 = Prod (Char 'x', Star (Prod (Char 'y', Char 'x')))
+
+let e4 = Prod [ Star (Prod [ Char 'x'; Char 'y' ]); Char 'x' ]
+let e5 = Prod [ Char 'x'; Star (Prod [ Char 'y'; Char 'x' ]) ]
 let e6 = Star (Char 'y')
 
 (** [gen_test name expected actual] constructs an OUnit test named
@@ -67,19 +68,19 @@ let dfa_equiv_tests =
 
 let parse_tests =
   [
-    parse_test "a + b" "Sum (Char a, Char b)";
-    parse_test "(x + x) + x" "Sum (Sum (Char x, Char x), Char x)";
-    parse_test "x + (x + x)" "Sum (Char x, Sum (Char x, Char x))";
+    parse_test "a + b" "Sum [Char a; Char b]";
+    parse_test "(x + x) + x" "Sum [Char x; Char x; Char x]";
+    parse_test "x + (x + x)" "Sum [Char x; Char x; Char x]";
     parse_test "x^" "Star (Char x)";
     parse_test "x^^" "Star (Star (Char x))";
-    parse_test "(x * y)^ * x" "Prod (Star (Prod (Char x, Char y)), Char x)";
-    parse_test "x * (y * x)^" "Prod (Char x, Star (Prod (Char y, Char x)))";
-    parse_test "(x + y)^" "Star (Sum (Char x, Char y))";
+    parse_test "(x * y)^ * x" "Prod [Star (Prod [Char x; Char y]); Char x]";
+    parse_test "x * (y * x)^" "Prod [Char x; Star (Prod [Char y; Char x])]";
+    parse_test "(x + y)^" "Star (Sum [Char x; Char y])";
     parse_test "x^ * (y * x^)^"
-      "Prod (Star (Char x), Star (Prod (Char y, Star (Char x))))";
+      "Prod [Star (Char x); Star (Prod [Char y; Star (Char x)])]";
     parse_test "(1 + x) * (1 + x) * (x * x * x)^"
-      "Prod (Prod (Sum (One, Char x), Sum (One, Char x)), Star (Prod (Prod \
-       (Char x, Char x), Char x)))";
+      "Prod [Sum [One; Char x]; Sum [One; Char x]; Star (Prod [Char x; Char x; \
+       Char x])]";
     parse_test "" "One";
   ]
 
@@ -108,11 +109,6 @@ let regex_equiv_tests decide =
 let suite =
   "test suite for A2"
   >::: List.flatten
-         [
-           dfa_equiv_tests;
-           regex_equiv_tests Equivalence.decide;
-           regex_equiv_tests Equivalence.decide2;
-           parse_tests;
-         ]
+         [ dfa_equiv_tests; regex_equiv_tests Equivalence.decide; parse_tests ]
 
 let _ = run_test_tt_main suite

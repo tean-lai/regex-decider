@@ -39,25 +39,45 @@ let decide e1 e2 =
   Queue.add (dfa1start, dfa2start) q;
   hk_loop uf q dfa1 dfa2
 
-module ExpSet = Set.Make (struct
-  type t = exp * exp
+(* let rec decide2_helper uf queue =
+     if Queue.is_empty queue then true
+     else
+       let e1, e2 = Queue.pop queue in
+       print_endline ((e1 |> string_of_exp) ^ "\n" ^ (e2 |> string_of_exp) ^ "\n\n");
+       for i = 0 to 1000000000 do
+         ()
+       done;
+       if ewp e1 <> ewp e2 then false
+       else (
+         List.map
+           (fun c ->
+             let e1', e2' = (derivative c e1, derivative c e2) in
+             if Uf.find uf e1' <> Uf.find uf e2' then (
+               Uf.union uf e1' e2';
+               Queue.push (e1', e2') queue))
+           alph
+         |> ignore;
+         decide2_helper uf queue)
 
-  let compare = compare
-end)
+   (* let decide2 e1 e2 =
+     let uf = Uf.create () in
+     let q = Queue.create () in
+     Queue.add (e1, e2) q;
+     decide2_helper uf q *) *)
 
-let rec decide2_helper visited e1 e2 =
-  if ExpSet.mem (e1, e2) visited then true
-  else
-    let visited = ExpSet.add (e1, e2) visited in
-    if ewp e1 <> ewp e2 then false
-    else
-      List.for_all
-        (fun c ->
-          let d1, d2 = (derivative c e1, derivative c e2) in
-          decide2_helper visited d1 d2)
-        alph
+(* let rec decide2_helper visited e1 e2 =
+     if ExpSet.mem (e1, e2) visited then true
+     else
+       let visited = ExpSet.add (e1, e2) visited in
+       if ewp e1 <> ewp e2 then false
+       else
+         List.for_all
+           (fun c ->
+             let d1, d2 = (derivative c e1, derivative c e2) in
+             decide2_helper visited d1 d2)
+           alph
 
-let decide2 e1 e2 = decide2_helper ExpSet.empty e1 e2
+   let decide2 e1 e2 = decide2_helper ExpSet.empty e1 e2 *)
 
 (* let rec hk_loop q =
    match Queue.is_empty q with

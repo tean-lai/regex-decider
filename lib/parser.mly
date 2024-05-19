@@ -28,7 +28,7 @@ exp:
   | ZERO { Zero }
   | ONE { One }
   | CHAR { Char $1 }
-  | exp PLUS exp { Sum ($1, $3) }
-  | exp TIMES exp { Prod ($1, $3) }
+  | exp PLUS exp { Sum [$1; $3] }
+  | exp TIMES exp { Prod [$1; $3] }
   | LPAREN exp RPAREN { $2 }
   | exp STAR { Star $1 }

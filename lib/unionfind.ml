@@ -1,12 +1,12 @@
-type t = { parent : (int, int) Hashtbl.t; size : (int, int) Hashtbl.t }
+type 'a t = { parent : ('a, 'a) Hashtbl.t; size : ('a, int) Hashtbl.t }
 
-let create () : t = { parent = Hashtbl.create 10; size = Hashtbl.create 10 }
+let create () = { parent = Hashtbl.create 10; size = Hashtbl.create 10 }
 
-let make_set uf x =
+let make_set (uf : 'a t) x : unit =
   Hashtbl.add uf.parent x x;
   Hashtbl.add uf.size x 1
 
-let rec find uf x =
+let rec find (uf : 'a t) (x : 'a) : 'a =
   try
     let p = Hashtbl.find uf.parent x in
     if p <> x then (
@@ -18,7 +18,7 @@ let rec find uf x =
     make_set uf x;
     x
 
-let union uf x y =
+let union (uf : 'a t) (x : 'a) (y : 'a) : unit =
   let root_x = find uf x in
   let root_y = find uf y in
   if root_x <> root_y then
