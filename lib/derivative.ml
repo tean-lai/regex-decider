@@ -97,6 +97,47 @@ let rec ewp (e : exp) : bool =
      | Prod (Sum (e1, e2), e3) -> Sum (lin2 (Prod (e1, e3)), lin2 (Prod (e2, e3)))
      | _ -> e *)
 
+module ExpSet = Set.Make (struct
+  type t = exp
+
+  let compare = compare
+end)
+
+let concat e (p, e') =
+  match e' with Prod es -> (p, Prod (e :: es)) | _ -> (p, Prod [ e; e' ])
+
+let concat' e1 e2 =
+  match (e1, e2) with
+  | Prod e1s, Prod e2s -> Prod (e1s @ e2s)
+  | Prod e1s, _ -> Prod (e1s @ [ e2 ])
+  | _, Prod e2s -> Prod (e1 :: e2s)
+  | _, _ -> Prod [ e1; e2 ]
+
+module CharExpSet = Set.Make (struct
+  type t = char * exp
+
+  let compare = compare
+end)
+
+let rec f e =
+  match e with
+  | Zero | One -> []
+  | Char c -> [ (c, One) ]
+  | Sum es ->
+      List.fold_left (fun acc x -> x @ acc) [] (List.map f es)
+      |> List.sort_uniq compare
+  | Star e' -> List.map (concat e) (f e')
+  | Prod [] -> []
+  | Prod (Zero :: erest) -> []
+  | Prod (One :: erest) -> f (Prod erest)
+  | Prod (Prod _ :: erest) -> failwith "shouldn't happen, products be flat"
+  | Prod (Char c :: erest) -> [ (c, Prod erest) ]
+  | Prod (Sum es :: erest) ->
+      let concatenations = List.map (concat' (Prod erest)) es in
+      List.map f concatenations |> List.fold_left (fun acc x -> x @ acc) []
+  | Prod (Star e' :: erest) -> List.map (concat e) (f e') @ f (Prod erest)
+
+let rec linearize e = failwith "todo3"
 let rec det e = failwith "todo1"
 let print_exp e = e |> string_of_exp |> print_endline
 

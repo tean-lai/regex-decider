@@ -6,6 +6,17 @@ type exp =
   | Prod of exp list
   | Star of exp
 
+let rec flatten e =
+  match e with
+  | Zero | One | Char _ -> e
+  | Sum es ->
+      let es' = List.map flatten es in
+      Sum (List.flatten (List.map (function Sum es -> es | e -> [ e ]) es'))
+  | Prod es ->
+      let es' = List.map flatten es in
+      Prod (List.flatten (List.map (function Prod es -> es | e -> [ e ]) es'))
+  | Star e -> Star (flatten e)
+
 let rec string_of_exp e =
   match e with
   | Zero -> "Zero"
