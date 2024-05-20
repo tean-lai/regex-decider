@@ -307,8 +307,8 @@ let exp_to_dfa (e : exp) : dfa =
   let nfae = exp_to_nfae e in
   nfae_to_dfa nfae
 
-let is_final s (dfa : dfa) : bool = IntSet.mem s dfa.final
-let dfa_read s c (dfa : dfa) : int option = Trans.find_opt (s, c) dfa.delta
+let is_final (dfa : dfa) s : bool = IntSet.mem s dfa.final
+let dfa_read (dfa : dfa) c s : int option = Trans.find_opt (s, c) dfa.delta
 
 let create_dfa size transitions start final : dfa =
   (* let size =

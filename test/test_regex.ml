@@ -53,9 +53,7 @@ let gen_test name expected_output actual_output : test =
 
 let regex_test decide s1 s2 expected =
   let name = if expected then s1 ^ " = " ^ s2 else s1 ^ " <> " ^ s2 in
-  let e1 = s1 |> Parse.parse_exp in
-  let e2 = s2 |> Parse.parse_exp in
-  name >:: fun _ -> assert_equal expected (decide e1 e2)
+  name >:: fun _ -> assert_equal expected (decide s1 s2)
 
 let parse_test s expected =
   let exp_string = s |> Parse.parse_exp |> string_of_exp in
