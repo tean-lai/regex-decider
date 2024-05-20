@@ -111,8 +111,8 @@ let suite =
   >::: List.flatten
          [
            dfa_equiv_tests;
-           regex_equiv_tests Equivalence.decide;
-           regex_equiv_tests Equivalence.decide_b;
+           regex_equiv_tests Equivalence.decide_w_automaton;
+           regex_equiv_tests Equivalence.decide_w_brzowski;
            parse_tests;
          ]
 

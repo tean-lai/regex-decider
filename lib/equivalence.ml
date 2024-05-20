@@ -12,25 +12,25 @@ let print (a, b) =
   print_int b;
   print_endline ""
 
-let rec hk_loop uf queue dfa1 dfa2 =
-  if Queue.is_empty queue then true
-  else
-    let p, q = Queue.pop queue in
-    if is_final p dfa1 <> is_final q dfa2 then false
-    else (
-      List.map
-        (fun a ->
-          match (dfa_read p a dfa1, dfa_read q a dfa2) with
-          | None, _ | _, None -> ()
-          | Some p', Some q' ->
-              if Uf.find uf p' <> Uf.find uf q' then (
-                Uf.union uf p' q';
-                Queue.push (p', q') queue))
-        alph
-      |> ignore;
-      hk_loop uf queue dfa1 dfa2)
-
-let decide e1 e2 =
+let decide_w_automaton e1 e2 =
+  let rec hk_loop uf queue dfa1 dfa2 =
+    if Queue.is_empty queue then true
+    else
+      let p, q = Queue.pop queue in
+      if is_final p dfa1 <> is_final q dfa2 then false
+      else (
+        List.map
+          (fun a ->
+            match (dfa_read p a dfa1, dfa_read q a dfa2) with
+            | None, _ | _, None -> ()
+            | Some p', Some q' ->
+                if Uf.find uf p' <> Uf.find uf q' then (
+                  Uf.union uf p' q';
+                  Queue.push (p', q') queue))
+          alph
+        |> ignore;
+        hk_loop uf queue dfa1 dfa2)
+  in
   let dfa1, dfa2 = (exp_to_dfa e1, exp_to_dfa e2) in
   let dfa2 = inc_all_states_dfa (dfa_size dfa1) dfa2 in
   let dfa1start, dfa2start = (dfa_start dfa1, dfa_start dfa2) in
@@ -39,7 +39,26 @@ let decide e1 e2 =
   Queue.add (dfa1start, dfa2start) q;
   hk_loop uf q dfa1 dfa2
 
-let decide_b e1 e2 = equiv (ExpExpSet.of_list [ (e1, e2) ]) ExpExpSet.empty
+let rec decide_w_brzowski e1 e2 =
+  let rec bisim queue visited =
+    match queue with
+    | [] -> true
+    | (e1, e2) :: _ when ewp e1 <> ewp e2 -> false
+    | (e1, e2) :: rest when List.mem (e1, e2) visited -> bisim rest visited
+    | (e1, e2) :: rest ->
+        let queue' =
+          List.fold_left
+            (fun acc c ->
+              let d1 = normalize (derivative c e1) in
+              let d2 = normalize (derivative c e2) in
+              (d1, d2) :: acc)
+            rest alph
+        in
+        bisim queue' ((e1, e2) :: visited)
+  in
+  bisim [ (normalize e1, normalize e2) ] []
+
+(* let decide_b e1 e2 = equiv (ExpExpSet.of_list [ (e1, e2) ]) ExpExpSet.empty *)
 
 (* let rec decide2_helper uf queue =
      if Queue.is_empty queue then true
