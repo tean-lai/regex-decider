@@ -39,6 +39,8 @@ let decide e1 e2 =
   Queue.add (dfa1start, dfa2start) q;
   hk_loop uf q dfa1 dfa2
 
+let decide_b e1 e2 = equiv (ExpExpSet.of_list [ (e1, e2) ]) ExpExpSet.empty
+
 (* let rec decide2_helper uf queue =
      if Queue.is_empty queue then true
      else

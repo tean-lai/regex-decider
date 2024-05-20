@@ -109,6 +109,11 @@ let regex_equiv_tests decide =
 let suite =
   "test suite for A2"
   >::: List.flatten
-         [ dfa_equiv_tests; regex_equiv_tests Equivalence.decide; parse_tests ]
+         [
+           dfa_equiv_tests;
+           regex_equiv_tests Equivalence.decide;
+           regex_equiv_tests Equivalence.decide_b;
+           parse_tests;
+         ]
 
 let _ = run_test_tt_main suite
