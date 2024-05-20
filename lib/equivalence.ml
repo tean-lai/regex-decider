@@ -39,7 +39,7 @@ let decide_w_automaton s1 s2 =
     [ (dfa_start dfa1, dfa_start dfa2) ]
     (is_final dfa1) (is_final dfa2) (dfa_read dfa1) (dfa_read dfa2)
 
-let rec decide_w_brzowski s1 s2 =
+let decide_w_brzowski s1 s2 =
   let e1, e2 = (parse_exp s1, parse_exp s2) in
   let uf = Uf.create () in
   let next c p = Some (normalize (derivative c p)) in
