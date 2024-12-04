@@ -12,7 +12,7 @@ Ast.ml contains the type for regular expressions, as well as functions that flat
 
 Automata.ml contains the types of DFAs, NFAs with epsilon closures, and NFAs without. Here contains most of the functions related to converting expressions to automaton, as well as converting automatons from NFA to DFA. I use Thompson's construction algorithm to convert from expressions to NFAs with epsilon closures and powerset construction to go from that to DFAs. 
 
-Derivative.ml contains functions that take Brzowski derivatives of expressions. There is a lot of commented code, where I attempted to linearize regexes to guarantee termination from repeated derivatives. This was before I introduced a function to normalize expressions. Getting Brzowski derivatives to terminate turned out to be quite tricky.
+Derivative.ml contains functions that take Brzozowski derivatives of expressions. There is a lot of commented code, where I attempted to linearize regexes to guarantee termination from repeated derivatives. This was before I introduced a function to normalize expressions. Getting Brzowski derivatives to terminate turned out to be quite tricky.
 
 Parse.ml contains functions that allow conversion from strings to regexes. For example, using [parse_exp "a^ * b^ + c"] will output Sum [Prod [Star (Char 'a'); Star (Char 'b')]; Char 'c']. It might be a little confusing, but here, "*" represents multiplication or concatenation while "^" represents the Kleene star operation. Parse.ml depends on menhir being installed to do the parsing.
 
