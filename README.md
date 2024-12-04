@@ -1,7 +1,7 @@
 ## Introduction
 Hi, welcome to my regex decision equivalence project!
 
-Essentially, this project is an implementation of two regular expression decision procedures: one by automata construction and one by brzowski derivatives.
+Essentially, this project is an implementation of two regular expression decision procedures: one by automata construction and one by Brzozowski derivatives.
 
 It will allow you to tell if two regular expressions represent the same regular language. For example, it is a theorem in regular language theory that "(1 + x)(1 + x)(xxx)* = x*" where "s*" represents the language {"", "s", "ss", "sss", "ssss", "sssss", ...}. This program will compute that theorem to be true.
 
